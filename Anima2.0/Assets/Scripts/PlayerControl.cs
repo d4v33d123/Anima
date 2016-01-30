@@ -26,13 +26,31 @@ public class PlayerControl : MonoBehaviour
 	private bool grounded = false;			// Whether or not the player is grounded.
 	private Animator anim;					// Reference to the player's animator component.
 
+    public int PlayerStates= 0;
+    //State 0 is normal, state 1 is climbing
+    float h,v;
+    public GameObject Arrow;
+    public bool RotatedOnce = false;
+
+    public int SeedDirection = 0;
+    public enum SeedDir { Left, Right, Up, Down, UpRight, UpLeft };
+    public SeedDir SD = SeedDir.Right;
+
+    public GameObject SeedPrefab;
+
 
 	void Awake()
 	{
 		// Setting up references.
 		groundCheck = transform.Find("groundCheck");
 		anim = GetComponent<Animator>();
+
 	}
+    void Start()
+    {
+        Arrow = GameObject.Find("ArrowHolder");
+        Arrow.SetActive(false);
+    }
 
 
 	void Update()
@@ -48,47 +66,201 @@ public class PlayerControl : MonoBehaviour
 
 	void FixedUpdate ()
 	{
+        //Arrow pointer
+
+        if (Input.GetKeyDown(KeyCode.UpArrow))
+        {
+            if (Input.GetKey(KeyCode.LeftArrow))
+            {
+                Arrow.transform.rotation = new Quaternion(0, 0, 0, 0);
+                if (facingRight)
+                    Arrow.transform.Rotate(0, 0, 45, Space.Self);
+                else
+                    Arrow.transform.Rotate(0, 0, 315, Space.Self);
+                SD = SeedDir.UpLeft;
+
+               
+
+
+            }
+            else if (Input.GetKey(KeyCode.RightArrow))
+            {
+                Arrow.transform.rotation = new Quaternion(0, 0, 0, 0);
+                if (facingRight)
+                    Arrow.transform.Rotate(0, 0, 315, Space.Self);
+                else
+                    Arrow.transform.Rotate(0, 0, 45, Space.Self);
+                SD = SeedDir.UpRight;
+
+
+            }
+            else
+            {
+                Arrow.transform.rotation = new Quaternion(0, 0, 0, 0);
+
+                Arrow.transform.rotation = new Quaternion(0, 0, 0, 0);
+                SD = SeedDir.Up;
+
+            }
+
+
+            Arrow.SetActive(true);
+
+        }
+        if (Input.GetKeyDown(KeyCode.LeftArrow))
+        {
+            if (Input.GetKey(KeyCode.UpArrow))
+            {
+                Arrow.transform.rotation = new Quaternion(0, 0, 0, 0);
+                if (facingRight)
+                    Arrow.transform.Rotate(0, 0, 45, Space.Self);
+                else
+                    Arrow.transform.Rotate(0, 0, 315, Space.Self);
+                SD = SeedDir.UpLeft;
+
+
+            }
+            else
+            {
+                Arrow.transform.rotation = new Quaternion(0, 0, 0, 0);
+                if (facingRight)
+
+                    Arrow.transform.Rotate(0, 0, 90, Space.Self);
+                else
+                    Arrow.transform.Rotate(0, 0, 270, Space.Self);
+                SD = SeedDir.Left;
+
+
+            }
+
+            Arrow.SetActive(true);
+
+        }
+        if (Input.GetKeyDown(KeyCode.RightArrow))
+        {
+            if (Input.GetKey(KeyCode.UpArrow))
+            {
+                Arrow.transform.rotation = new Quaternion(0, 0, 0, 0);
+                if (facingRight)
+                    Arrow.transform.Rotate(0, 0, 315, Space.Self);
+                else
+                    Arrow.transform.Rotate(0, 0, 45, Space.Self);
+                SD = SeedDir.UpRight;
+
+
+            }
+            else
+            {
+                Arrow.transform.rotation = new Quaternion(0, 0, 0, 0);
+                if (facingRight)
+                    Arrow.transform.Rotate(0, 0, 270, Space.Self);
+                else
+                    Arrow.transform.Rotate(0, 0, 90, Space.Self);
+                SD = SeedDir.Right;
+
+            }
+            Arrow.SetActive(true);
+
+        }
+        if (Input.GetKeyDown(KeyCode.DownArrow))
+        {
+            Arrow.transform.rotation = new Quaternion(0, 0, 0, 0);
+
+            Arrow.transform.Rotate(0, 0, 180, Space.Self);
+            SD = SeedDir.Down;
+
+            Arrow.SetActive(true);
+
+        }
+
+        if (!Input.GetKey(KeyCode.UpArrow) && !Input.GetKey(KeyCode.LeftArrow) && !Input.GetKey(KeyCode.RightArrow) && !Input.GetKey(KeyCode.DownArrow))
+        {
+            Arrow.transform.rotation = new Quaternion(0, 0, 0, 0);
+            if(facingRight)
+            SD = SeedDir.Right;
+            else
+                SD = SeedDir.Left;
+
+
+            Arrow.SetActive(false);
+
+
+        }
+
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            GameObject Seed = Instantiate(SeedPrefab, transform.position, Quaternion.identity) as GameObject;
+           // Seed.GetComponent<SeedScript>().SeedDirection(SD);
+
+        }
+
+
 		// Cache the horizontal input.
-		float h = Input.GetAxis("Horizontal");
+        if (PlayerStates == 0)
+        {
+            GetComponent<Rigidbody2D>().gravityScale = 1.0f;
 
-		// The Speed animator parameter is set to the absolute value of the horizontal input.
-		anim.SetFloat("Speed", Mathf.Abs(h));
+            h = Input.GetAxis("Horizontal");
 
-		// If the player is changing direction (h has a different sign to velocity.x) or hasn't reached maxSpeed yet...
-		if(h * GetComponent<Rigidbody2D>().velocity.x < maxSpeed)
-			// ... add a force to the player.
-			GetComponent<Rigidbody2D>().AddForce(Vector2.right * h * moveForce);
 
-		// If the player's horizontal velocity is greater than the maxSpeed...
-		if(Mathf.Abs(GetComponent<Rigidbody2D>().velocity.x) > maxSpeed)
-			// ... set the player's velocity to the maxSpeed in the x axis.
-			GetComponent<Rigidbody2D>().velocity = new Vector2(Mathf.Sign(GetComponent<Rigidbody2D>().velocity.x) * maxSpeed, GetComponent<Rigidbody2D>().velocity.y);
+            // The Speed animator parameter is set to the absolute value of the horizontal input.
+            anim.SetFloat("Speed", Mathf.Abs(h));
 
-		// If the input is moving the player right and the player is facing left...
-		if(h > 0 && !facingRight)
-			// ... flip the player.
-			Flip();
-		// Otherwise if the input is moving the player left and the player is facing right...
-		else if(h < 0 && facingRight)
-			// ... flip the player.
-			Flip();
+            // If the player is changing direction (h has a different sign to velocity.x) or hasn't reached maxSpeed yet...
+            if (h * GetComponent<Rigidbody2D>().velocity.x < maxSpeed)
+                // ... add a force to the player.
+                GetComponent<Rigidbody2D>().AddForce(Vector2.right * h * moveForce);
 
-		// If the player should jump...
-		if(jump)
-		{
-			// Set the Jump animator trigger parameter.
-			anim.SetTrigger("Jump");
+            // If the player's horizontal velocity is greater than the maxSpeed...
+            if (Mathf.Abs(GetComponent<Rigidbody2D>().velocity.x) > maxSpeed)
+                // ... set the player's velocity to the maxSpeed in the x axis.
+                GetComponent<Rigidbody2D>().velocity = new Vector2(Mathf.Sign(GetComponent<Rigidbody2D>().velocity.x) * maxSpeed, GetComponent<Rigidbody2D>().velocity.y);
 
-			// Play a random jump audio clip.
-			//int i = Random.Range(0, jumpClips.Length);
-			//AudioSource.PlayClipAtPoint(jumpClips[i], transform.position);
+            // If the input is moving the player right and the player is facing left...
+            if (h > 0 && !facingRight)
+                // ... flip the player.
+                Flip();
+            // Otherwise if the input is moving the player left and the player is facing right...
+            else if (h < 0 && facingRight)
+                // ... flip the player.
+                Flip();
 
-			// Add a vertical force to the player.
-			GetComponent<Rigidbody2D>().AddForce(new Vector2(0f, jumpForce));
+            // If the player should jump...
+            if (jump)
+            {
+                // Set the Jump animator trigger parameter.
+                anim.SetTrigger("Jump");
 
-			// Make sure the player can't jump again until the jump conditions from Update are satisfied.
-			jump = false;
-		}
+                // Play a random jump audio clip.
+                //int i = Random.Range(0, jumpClips.Length);
+                //AudioSource.PlayClipAtPoint(jumpClips[i], transform.position);
+
+                // Add a vertical force to the player.
+                GetComponent<Rigidbody2D>().AddForce(new Vector2(0f, jumpForce));
+
+                // Make sure the player can't jump again until the jump conditions from Update are satisfied.
+                jump = false;
+            }
+        }
+        if (PlayerStates == 1)//Climbing a vine
+        {
+            GetComponent<Rigidbody2D>().gravityScale = 0.0f;
+            v = Input.GetAxis("Vertical");
+            GetComponent<Rigidbody2D>().velocity = new Vector2(GetComponent<Rigidbody2D>().velocity.x, v * 4);
+            h = Input.GetAxis("Horizontal");
+            GetComponent<Rigidbody2D>().velocity = new Vector2(h*2, GetComponent<Rigidbody2D>().velocity.y);
+
+            /*
+            if (v * GetComponent<Rigidbody2D>().velocity.y < maxSpeed)
+                // ... add a force to the player.
+                GetComponent<Rigidbody2D>().AddForce(Vector2.up * v * moveForce);
+
+            if (Mathf.Abs(GetComponent<Rigidbody2D>().velocity.y) > maxSpeed)
+                // ... set the player's velocity to the maxSpeed in the x axis.
+                GetComponent<Rigidbody2D>().velocity = new Vector2(GetComponent<Rigidbody2D>().velocity.x, Mathf.Sign(GetComponent<Rigidbody2D>().velocity.y) * maxSpeed);
+             */
+
+        }
 	}
 	
 	
@@ -140,4 +312,22 @@ public class PlayerControl : MonoBehaviour
 			// Otherwise return this index.
 			return i;
 	}
+    void OnTriggerEnter2D(Collider2D Col)
+    {
+        if(Col.tag=="Vine")
+        {
+            Debug.Log("Entered Vine");
+            PlayerStates = 1;
+            GetComponent<Rigidbody2D>().velocity = new Vector2(0, 0);
+        }
+    }
+    void OnTriggerExit2D(Collider2D Col)
+    {
+        if(Col.tag=="Vine")
+        {
+            Debug.Log("Exited Vine");
+
+            PlayerStates = 0;
+        }
+    }
 }

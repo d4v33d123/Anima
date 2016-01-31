@@ -75,6 +75,7 @@ MonoBehaviour:
   StartCalc: 0
   VineH: {fileID: 126900, guid: 795583f10daa1294d98241ee2c76493e, type: 2}
   VineV: {fileID: 110234, guid: 33fbbfd88225483419dd5146c4e1ad21, type: 2}
+  Rope: {fileID: 105672, guid: 08301216e6e84f043867eb1f72d92772, type: 2}
 --- !u!212 &21225808
 SpriteRenderer:
   m_ObjectHideFlags: 1
@@ -124,6 +125,10 @@ Prefab:
       propertyPath: m_Layer
       value: 13
       objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: Rope
+      value: 
+      objectReference: {fileID: 105672, guid: 08301216e6e84f043867eb1f72d92772, type: 2}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}
   m_RootGameObject: {fileID: 176986}

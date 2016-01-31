@@ -68,6 +68,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\BoatScript.cs" />
+    <Compile Include="Assets\CarryScript.cs" />
     <Compile Include="Assets\Scripts\BackgroundParallax.cs" />
     <Compile Include="Assets\Scripts\BackgroundPropSpawner.cs" />
     <Compile Include="Assets\Scripts\Camera2DFollow22.cs" />
@@ -77,6 +79,8 @@
     <Compile Include="Assets\Scripts\Parallaxing.cs" />
     <Compile Include="Assets\Scripts\PlatformScript.cs" />
     <Compile Include="Assets\Scripts\PlayerControl.cs" />
+    <Compile Include="Assets\Scripts\RopeColliderScript.cs" />
+    <Compile Include="Assets\Scripts\RopeScript.cs" />
     <Compile Include="Assets\Scripts\SeedScript.cs" />
     <Compile Include="Assets\Scripts\SetParticleSortingLayer.cs" />
     <Compile Include="Assets\Scripts\SteeringAgent.cs" />
@@ -87,6 +91,7 @@
     <Compile Include="Assets\Scripts\kame1.cs" />
     <Compile Include="Assets\Scripts\kame2.cs" />
     <Compile Include="Assets\Scripts\playerLauncher.cs" />
+    <Compile Include="Assets\toadstool.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\SyntaxTree\UnityVS\2013\UnityVS.CSharp.targets" />
 </Project>

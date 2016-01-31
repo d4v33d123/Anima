@@ -16,6 +16,7 @@ TagManager:
   - Vine
   - Platform
   - VineH
+  - Rope
   layers:
   - Default
   - TransparentFX
@@ -31,7 +32,7 @@ TagManager:
   - Pickups
   - Ground
   - Seeds
-  - 
+  - Rope
   - 
   - 
   - 

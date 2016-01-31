@@ -37,6 +37,13 @@ public class PlayerControl : MonoBehaviour
     public SeedDir SD = SeedDir.Right;
 
     public GameObject SeedPrefab;
+    public Vector3 SavedPosition;
+
+    public float SeedSpawnCounter = 0.0f;
+
+    public int SeedAmmo = 6;
+
+    float StateCounter = 0.0f;
 
 
 	void Awake()
@@ -44,12 +51,14 @@ public class PlayerControl : MonoBehaviour
 		// Setting up references.
 		groundCheck = transform.Find("groundCheck");
 		anim = GetComponent<Animator>();
+        PlayerStates = 2;
 
 	}
     void Start()
     {
         Arrow = GameObject.Find("ArrowHolder");
         Arrow.SetActive(false);
+
     }
 
 
@@ -59,15 +68,26 @@ public class PlayerControl : MonoBehaviour
 		grounded = Physics2D.Linecast(transform.position, groundCheck.position, 1 << LayerMask.NameToLayer("Ground"));  
 
 		// If the jump button is pressed and the player is grounded then the player should jump.
-		if(Input.GetButtonDown("Jump") && grounded)
-			jump = true;
+        if (Input.GetButtonDown("Jump") && grounded)
+        {
+            jump = true;
+        }
+        if(!jump)
+        {
+            grounded = Physics2D.Linecast(transform.position, groundCheck.position, 1 << LayerMask.NameToLayer("Rope"));
+            if (Input.GetButtonDown("Jump") && grounded)
+            {
+                jump = true;
+            }
+
+        }
 	}
 
 
 	void FixedUpdate ()
 	{
         //Arrow pointer
-
+        SeedSpawnCounter += Time.deltaTime;
         if (Input.GetKeyDown(KeyCode.UpArrow))
         {
             if (Input.GetKey(KeyCode.LeftArrow))
@@ -189,8 +209,14 @@ public class PlayerControl : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.E))
         {
-            GameObject Seed = Instantiate(SeedPrefab, transform.position, Quaternion.identity) as GameObject;
-           // Seed.GetComponent<SeedScript>().SeedDirection(SD);
+            if (SeedAmmo > 1&&SeedSpawnCounter>=2.5f)
+            {
+
+                GameObject Seed = Instantiate(SeedPrefab, transform.position, Quaternion.identity) as GameObject;
+                // Seed.GetComponent<SeedScript>().SeedDirection(SD);
+                SeedSpawnCounter = 0.0f;
+                SeedAmmo--;
+            }
 
         }
 
@@ -261,6 +287,23 @@ public class PlayerControl : MonoBehaviour
              */
 
         }
+        if(PlayerStates==2)
+        {
+            GetComponent<Rigidbody2D>().gravityScale = 1.0f;
+            StateCounter += Time.deltaTime;
+            //if(Input.GetAxis("Horizontal")!=0)
+           // GetComponent<Rigidbody2D>().AddForce(new Vector2(Input.GetAxis("Horizontal"),0));
+
+        }
+        if(StateCounter>=2f)
+        {
+            StateCounter = 0;
+            PlayerStates = 0;
+        }
+        if(PlayerStates==3)
+        {
+            GetComponent<Rigidbody2D>().velocity = new Vector2(5, 0);
+        }
 	}
 	
 	
@@ -314,16 +357,56 @@ public class PlayerControl : MonoBehaviour
 	}
     void OnTriggerEnter2D(Collider2D Col)
     {
-        if(Col.tag=="Vine")
+        if (Col.tag == "Vine" || Col.tag == "Rope")
         {
             Debug.Log("Entered Vine");
             PlayerStates = 1;
             GetComponent<Rigidbody2D>().velocity = new Vector2(0, 0);
+            
         }
+        if(Col.tag=="Rope")
+        {
+            SavedPosition = transform.position;
+            jump = false;
+        }
+        if(Col.name=="end1")
+        {
+            PlayerStates = 3;
+        }
+        if (Col.name == "end2")
+        {
+            GameObject.Destroy(gameObject);
+        }
+    }
+     void OnTriggerStay2D(Collider2D Col)
+    {
+         if(Col.tag=="Rope")
+         {
+             SavedPosition = transform.position;
+             transform.position = Col.transform.position;
+             if(Input.GetKeyDown(KeyCode.Space))
+             {
+                 //Col.enabled = false;
+                 Debug.Log("LET GO!");
+                 GameObject.Find("R1").GetComponent<BoxCollider2D>().enabled = false;
+                 GameObject.Find("R2").GetComponent<BoxCollider2D>().enabled = false;
+                 GameObject.Find("R3").GetComponent<BoxCollider2D>().enabled = false;
+
+
+                // GetComponent<Rigidbody2D>().AddForce(new Vector2((transform.position.x - SavedPosition.x)*8000,(transform.position.y - SavedPosition.y)*4000));
+
+                 PlayerStates = 2;
+                 GetComponent<Rigidbody2D>().AddForce(new Vector2(Input.GetAxis("Horizontal") * 200, Input.GetAxis("Vertical") * 350));
+                // GetComponent<Rigidbody2D>().velocity=(new Vector2(Input.GetAxis("Horizontal") * 3000, Input.GetAxis("Vertical") * 400));
+
+
+
+             }
+         }
     }
     void OnTriggerExit2D(Collider2D Col)
     {
-        if(Col.tag=="Vine")
+        if(Col.tag=="Vine"||Col.tag=="Rope")
         {
             Debug.Log("Exited Vine");
 
